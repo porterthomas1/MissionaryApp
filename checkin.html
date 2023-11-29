@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Check-in</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Back arrow button for navigation -->
+    <button onclick="goBack()" class="back-button">← Back</button>
+
+    <div id="checkInContainer">
+      <h2>Daily Check-in</h2>
+      <h2>How are you feeling today?</h2>
+      <!-- Add your check-in form here -->
+      <div>
+        <button onclick="setEmoji(this, '😊')" class="emoji">😊</button>
+        <button onclick="setEmoji(this, '🫤')" class="emoji">🫤</button>
+        <button onclick="setEmoji(this, '😞')" class="emoji">😞</button>
+        <button onclick="setEmoji(this, '😓')" class="emoji">😓</button>
+        <button onclick="setEmoji(this, '😠')" class="emoji">😠</button>
+      </div>
+      <textarea id="checkInInput" placeholder="Additional thoughts"></textarea>
+      <button onclick="submitCheckIn()">Submit</button>
+    </div>
+
+    <script>
+      // Variable to store the selected emoji
+      var selectedEmoji = "";
+
+      function goBack() {
+        // Navigate back to the previous page
+        window.history.back();
+      }
+
+      // Function to set the selected emoji
+      function setEmoji(emojiButton, emoji) {
+        // Remove outline from previously selected emoji
+        var prevSelectedEmojiButton = document.querySelector(".selected-emoji");
+        if (prevSelectedEmojiButton) {
+          prevSelectedEmojiButton.classList.remove("selected-emoji");
+        }
+
+        // Add outline to the newly selected emoji
+        emojiButton.classList.add("selected-emoji");
+
+        // Set the selected emoji
+        selectedEmoji = emoji;
+      }
+
+      function submitCheckIn() {
+        // Add logic to handle the check-in submission
+        var checkInText = document.getElementById("checkInInput").value;
+
+        // Check if both emoji and text are selected
+        if (selectedEmoji || checkInText.trim() !== "") {
+          // You may want to send this data to your backend for storage and processing
+          console.log(
+            "Check-in submitted:",
+            checkInText,
+            "Emoji:",
+            selectedEmoji
+          );
+
+          // Get the current date (only the date, not the time)
+          var currentDate = new Date();
+          var dateStr = currentDate.toLocaleDateString();
+
+          // Get existing check-in history from localStorage or initialize an empty array
+          var checkInHistory =
+            JSON.parse(localStorage.getItem("checkInHistory")) || [];
+
+          // Add the new check-in to the history with the selected emoji
+          checkInHistory.push({
+            text: checkInText,
+            date: dateStr,
+            emoji: selectedEmoji,
+          });
+
+          // Save the updated check-in history to localStorage
+          localStorage.setItem(
+            "checkInHistory",
+            JSON.stringify(checkInHistory)
+          );
+        }
+
+        // Reset selected emoji for the next check-in
+        selectedEmoji = "";
+
+        // Navigate back to index.html
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

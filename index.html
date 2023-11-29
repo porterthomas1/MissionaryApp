@@ -5,47 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mental Health App</title>
     <link rel="stylesheet" href="styles.css" />
-    <style>
-      /* Add some basic styling for the response list */
-      #checkInHistory {
-        list-style-type: none;
-        padding: 0;
-      }
-
-      #checkInHistory li {
-        margin: 10px 0;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-    </style>
   </head>
   <body>
     <header>Missionary Mind</header>
 
-    <div id="checkInContainer">
-      <h2>Daily Check-in</h2>
-      <!-- Add your check-in form here -->
-      <textarea
-        id="checkInInput"
-        placeholder="How are you feeling today?"
-      ></textarea>
-      <button onclick="submitCheckIn()">Submit</button>
-    </div>
+    <!-- Circular button linking to checkin.html -->
+    <a href="checkin.html" class="circular-button">Check-in</a>
 
-    <div id="calendarContainer">
-      <h2>Monthly Calendar</h2>
+    <div id="resourcesContainer">
+      <h2>Resources</h2>
       <!-- Add your calendar here -->
-      <div id="calendar">
+      <div id="resources">
         <!-- Calendar content goes here -->
       </div>
     </div>
 
     <!-- Add a section to display submitted check-ins -->
-    <div id="checkInList">
+    <div id="checkinHistoryContainer">
       <h2>Check-in History</h2>
       <ul id="checkInHistory"></ul>
     </div>
@@ -53,30 +29,62 @@
     <footer>© 2023 Missionary Mind</footer>
 
     <script>
-      function submitCheckIn() {
-        // Add logic to handle the check-in submission
-        var checkInText = document.getElementById('checkInInput').value;
-        // You may want to send this data to your backend for storage and processing
-        console.log('Check-in submitted:', checkInText);
+      document.addEventListener("DOMContentLoaded", function () {
+        // Retrieve check-in history from localStorage and display it
+        var checkInHistory =
+          JSON.parse(localStorage.getItem("checkInHistory")) || [];
+        updateCheckInList(checkInHistory);
+      });
 
-        // Get the current date (only the date, not the time)
-        var currentDate = new Date();
-        var dateStr = currentDate.toLocaleDateString();
+      function updateCheckInList(checkInHistory) {
+        var checkInHistoryElement = document.getElementById("checkInHistory");
 
-        // Create a new list item to display the submitted check-in with the date to the right
-        var checkInHistory = document.getElementById('checkInHistory');
-        var listItem = document.createElement('li');
-        listItem.innerHTML = '<span>' + checkInText + '</span><span>' + dateStr + '</span>';
-        checkInHistory.appendChild(listItem);
+        // Clear existing content
+        checkInHistoryElement.innerHTML = "";
 
-        // Clear the input field after submission
-        document.getElementById('checkInInput').value = '';
+        // Display check-in history
+        checkInHistory.forEach(function (checkIn, index) {
+          var listItem = document.createElement("li");
 
-        // Update the progress circle percentage (just for example, replace with actual completion percentage)
-        var completionPercentage = Math.random() * 100;
-        document
-          .getElementById('progressCircle')
-          .style.setProperty('--progress', completionPercentage + '%');
+          // Display check-in text and date
+          listItem.innerHTML =
+            "<span class='checkInEmoji'>" +
+            checkIn.emoji +
+            "<span class='checkInText'>" +
+            checkIn.text +
+            "</span><span class='checkInDate'>" +
+            checkIn.date +
+            "</span>";
+
+          // Add a button to remove the check-in
+          var removeButton = document.createElement("button");
+          removeButton.innerText = "Remove";
+          removeButton.className = "removeButton";
+          removeButton.onclick = function () {
+            removeCheckIn(index);
+          };
+
+          // Append the remove button to the list item
+          listItem.appendChild(removeButton);
+
+          // Append the list item to the check-in history
+          checkInHistoryElement.appendChild(listItem);
+        });
+      }
+
+      // Function to remove a check-in from the history
+      function removeCheckIn(index) {
+        var checkInHistory =
+          JSON.parse(localStorage.getItem("checkInHistory")) || [];
+
+        // Remove the check-in at the specified index
+        checkInHistory.splice(index, 1);
+
+        // Save the updated check-in history to localStorage
+        localStorage.setItem("checkInHistory", JSON.stringify(checkInHistory));
+
+        // Update the displayed check-in history
+        updateCheckInList(checkInHistory);
       }
     </script>
   </body>
