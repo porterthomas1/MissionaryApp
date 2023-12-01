@@ -6,6 +6,7 @@
     <title>Mental Health App</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
     <header>Missionary Mind</header>
 
@@ -13,10 +14,40 @@
     <a href="checkin.html" class="circular-button">Check-in</a>
 
     <div id="resourcesContainer">
-      <h2>Resources</h2>
+      <h2>Additional Resources</h2>
       <!-- Add your calendar here -->
       <div id="resources">
-        <!-- Calendar content goes here -->
+        <button class="accordion">Perform Acts of Service</button>
+        <div class="panel">
+          <p> 
+            Engaging in service can be a healthy distraction from negative thoughts or rumination. 
+            It provides an opportunity to focus on something outside of oneself and redirect attention to positive actions.
+            Find a way to serve your companion or a stranger today. 
+            <br/> 
+            <br/>
+            "The pure love of Christ is expressed as we give selfless service. Helping one another is a 
+            sanctifying experience which exalts the receiver and humbles the giver. It helps us become true disciples of Christ." 
+            - Silvia H. Allred, "The Essence of Discipleship", April 2011 General Conference
+          </p>
+        </div>
+
+        <button class="accordion">Seek Assistance From Leaders</button>
+        <div class="panel">
+          <p>
+            Expressing your emotions through verbalization not only helps you acknowledge and release pent-up feelings but 
+            also provides a sense of relief. If you're struggling, don't hesitate to talk to a companion or reach out for 
+            additional help. Mission leaders and therapists are valuable resources for professional assistance.
+          </p>
+        </div>
+
+        <button class="accordion">Obtain Heavenly Help</button>
+        <div class="panel">
+          <p>
+            Our first resource for help in this life should be our Father in Heaven. The scriptures teach that in our personal 
+            search for support and assistance, there is one, even Jesus Christ, who can help us. He has offered this sweet 
+            counsel: “Come unto me, all ye that labour and are heavy laden, and I will give you rest."
+          </p>
+        </div>
       </div>
     </div>
 
@@ -85,6 +116,21 @@
 
         // Update the displayed check-in history
         updateCheckInList(checkInHistory);
+      }
+
+      var acc = document.getElementsByClassName("accordion");
+      var i;
+
+      for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var panel = this.nextElementSibling;
+          if (panel.style.display === "block") {
+            panel.style.display = "none";
+          } else {
+            panel.style.display = "block";
+          }
+        });
       }
     </script>
   </body>
