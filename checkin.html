@@ -6,6 +6,7 @@
     <title>Daily Check-in</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
     <!-- Back arrow button for navigation -->
     <button onclick="goBack()" class="back-button">← Back</button>
@@ -39,10 +40,9 @@
       <textarea id="checkInInput" placeholder="Additional thoughts"></textarea>
       <button onclick="submitCheckIn()">Submit</button>
     </div>
-    
 
     <!-- Pop-up Structure -->
-    <div id="advicePopup" class="popup" style="display:none;">
+    <div id="advicePopup" class="popup" style="display: none">
       <div class="popup-content">
         <span class="close" onclick="closePopup()">&times;</span>
         <p id="adviceText"></p>
@@ -50,14 +50,13 @@
       </div>
     </div>
 
-
     <script>
       // Variable to store the selected emoji
       var selectedEmoji = "";
 
       function goBack() {
-        // Navigate back to the previous page
-        window.history.back();
+        // Navigate back to index.html
+        window.location.href = "index.html";
       }
 
       // Function to set the selected emoji
@@ -75,20 +74,18 @@
         selectedEmoji = emoji;
       }
 
+      // Function to get the date parameter from the URL
+      function getDateParameter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("date");
+      }
+
       function submitCheckIn() {
         // Add logic to handle the check-in submission
         var checkInText = document.getElementById("checkInInput").value;
 
         // Check if both emoji and text are selected
         if (selectedEmoji || checkInText.trim() !== "") {
-          // You may want to send this data to your backend for storage and processing
-          console.log(
-            "Check-in submitted:",
-            checkInText,
-            "Emoji:",
-            selectedEmoji
-          );
-
           // Get the current date (only the date, not the time)
           var currentDate = new Date();
           var dateStr = currentDate.toLocaleDateString();
@@ -97,10 +94,18 @@
           var checkInHistory =
             JSON.parse(localStorage.getItem("checkInHistory")) || [];
 
-          // Add the new check-in to the history with the selected emoji
+          // Get the selected date from localStorage
+          var selectedDate = localStorage.getItem("selectedDate");
+
+          // Remove any existing check-ins for the selected date
+          checkInHistory = checkInHistory.filter(
+            (checkIn) => checkIn.date !== selectedDate
+          );
+
+          // Add the new check-in to the history with the selected emoji and date
           checkInHistory.push({
             text: checkInText,
-            date: dateStr,
+            date: selectedDate,
             emoji: selectedEmoji,
           });
 
@@ -109,54 +114,57 @@
             "checkInHistory",
             JSON.stringify(checkInHistory)
           );
-        }
 
-        // Show popup screen
-        if (selectedEmoji) {
-          showAdvicePopup(selectedEmoji);
-        }
+          // Show popup screen
+          if (selectedEmoji) {
+            showAdvicePopup(selectedEmoji);
+          }
 
-        // Reset selected emoji for the next check-in
-        selectedEmoji = "";
+          // Reset selected emoji for the next check-in
+          selectedEmoji = "";
+
+          // // Navigate back to index.html
+          // window.location.href = "index.html";
+        }
       }
 
       function showAdvicePopup(emoji) {
         var advice = {
           "😊": {
             text: "Great to hear you're feeling good! Keep up the positive vibe!",
-            link: "https://www.churchofjesuschrist.org/study/general-conference/2019/04/14uchtdorf?lang=eng"
+            link: "https://www.churchofjesuschrist.org/study/general-conference/2019/04/14uchtdorf?lang=eng",
           },
           "🫤": {
             text: "It's okay to be unsure. Take your time to understand your feelings.",
-            link: "https://www.churchofjesuschrist.org/study/general-conference/2013/04/catch-the-wave?lang=eng"
+            link: "https://www.churchofjesuschrist.org/study/general-conference/2013/04/catch-the-wave?lang=eng",
           },
           "😞": {
             text: "It seems like you're going through a tough time. Remember, it's okay to feel sad and to let your emotions out. You're not alone.",
-            link: "https://annathemissionary.files.wordpress.com/2013/03/elder-holland-the-miracle-of-a-mission.pdf"
+            link: "https://annathemissionary.files.wordpress.com/2013/03/elder-holland-the-miracle-of-a-mission.pdf",
           },
           "😓": {
             text: "It looks like you might be feeling stressed or anxious. Remember, taking a moment for yourself can be very beneficial. Breathe deeply, and try to relax.",
-            link: "https://www.churchofjesuschrist.org/study/general-conference/2021/10/25kopischke?lang=eng"
+            link: "https://www.churchofjesuschrist.org/study/general-conference/2021/10/25kopischke?lang=eng",
           },
           "😠": {
             text: "Anger is a strong emotion, but handling it in a healthy way is important. Consider taking a few deep breaths and finding a peaceful way to express these feelings.",
-            link: "https://churchofjesuschrist.org/study/general-conference/2007/10/slow-to-anger?lang=eng"
+            link: "https://churchofjesuschrist.org/study/general-conference/2007/10/slow-to-anger?lang=eng",
           },
         };
 
-        var popup = document.getElementById('advicePopup');
-        var adviceText = document.getElementById('adviceText');
-        var adviceLink = document.getElementById('adviceLink');
+        var popup = document.getElementById("advicePopup");
+        var adviceText = document.getElementById("adviceText");
+        var adviceLink = document.getElementById("adviceLink");
 
         adviceText.textContent = advice[emoji].text;
         adviceLink.href = advice[emoji].link;
 
-        popup.style.display = 'block';
+        popup.style.display = "block";
       }
 
       function closePopup() {
-        var popup = document.getElementById('advicePopup');
-        popup.style.display = 'none';
+        var popup = document.getElementById("advicePopup");
+        popup.style.display = "none";
 
         // Navigate back to index.html
         window.location.href = "index.html";

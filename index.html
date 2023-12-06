@@ -17,54 +17,51 @@
       <h2>Additional Resources</h2>
       <!-- Add your calendar here -->
       <div id="resources">
-        <button class="accordion">Perform Acts of Service</button>
-        <div class="panel">
-          <p> 
-            Engaging in service can be a healthy distraction from negative thoughts or rumination. 
-            It provides an opportunity to focus on something outside of oneself and redirect attention to positive actions.
-            Find a way to serve your companion or a stranger today. 
-            <br/> 
-            <br/>
-            "The pure love of Christ is expressed as we give selfless service. Helping one another is a 
-            sanctifying experience which exalts the receiver and humbles the giver. It helps us become true disciples of Christ." 
-            - Silvia H. Allred, "The Essence of Discipleship", April 2011 General Conference
-          </p>
-        </div>
-
-        <button class="accordion">Seek Assistance From Leaders</button>
-        <div class="panel">
-          <p>
-            Expressing your emotions through verbalization not only helps you acknowledge and release pent-up feelings but 
-            also provides a sense of relief. If you're struggling, don't hesitate to talk to a companion or reach out for 
-            additional help. Mission leaders and therapists are valuable resources for professional assistance.
-          </p>
-        </div>
-
-        <button class="accordion">Obtain Heavenly Help</button>
-        <div class="panel">
-          <p>
-            Our first resource for help in this life should be our Father in Heaven. The scriptures teach that in our personal 
-            search for support and assistance, there is one, even Jesus Christ, who can help us. He has offered this sweet 
-            counsel: “Come unto me, all ye that labour and are heavy laden, and I will give you rest."
-          </p>
-        </div>
+        <!-- ... your existing resource content -->
       </div>
     </div>
 
-    <!-- Add a section to display submitted check-ins -->
-    <div id="checkinHistoryContainer">
-      <h2>Check-in History</h2>
-      <ul id="checkInHistory"></ul>
+    <!-- Calendar Section -->
+    <h2>Current Month Calendar</h2>
+    <div id="calendar-container">
+      <table id="calendar">
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </table>
     </div>
 
     <footer>© 2023 Missionary Mind</footer>
+
+    <!-- Popup Structure -->
+    <div id="advicePopup" class="popup" style="display: none">
+      <div class="popup-content">
+        <span class="close" onclick="closePopup()">&times;</span>
+        <textarea id="editNote" placeholder="Edit your note"></textarea>
+        <button id="saveEditButton" onclick="saveEdit()">Save Edit</button>
+        <button
+          id="deleteEntryButton"
+          onclick="deleteEntry(localStorage.getItem('editIndex'))"
+        >
+          Delete Entry
+        </button>
+        <p id="adviceText"></p>
+        <a id="adviceLink" href="#">Conference Talk</a>
+      </div>
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Retrieve check-in history from localStorage and display it
         var checkInHistory =
           JSON.parse(localStorage.getItem("checkInHistory")) || [];
-        updateCheckInList(checkInHistory);
+        generateCalendar(checkInHistory);
       });
 
       function updateCheckInList(checkInHistory) {
@@ -87,23 +84,131 @@
             checkIn.date +
             "</span>";
 
-          // Add a button to remove the check-in
-          var removeButton = document.createElement("button");
-          removeButton.innerText = "Remove";
-          removeButton.className = "removeButton";
-          removeButton.onclick = function () {
-            removeCheckIn(index);
+          // Add a button to remove the check-in and show the popup
+          listItem.onclick = function () {
+            showAdvicePopup(checkIn);
           };
-
-          // Append the remove button to the list item
-          listItem.appendChild(removeButton);
 
           // Append the list item to the check-in history
           checkInHistoryElement.appendChild(listItem);
         });
       }
 
-      // Function to remove a check-in from the history
+      function generateCalendar(checkInHistory) {
+        const table = document.getElementById("calendar");
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        // Clear existing content
+        table.innerHTML =
+          "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>";
+
+        let dayCounter = 1;
+
+        for (let i = 0; i < 6; i++) {
+          const row = table.insertRow();
+          for (let j = 0; j < 7; j++) {
+            const cell = row.insertCell();
+            cell.classList.add("calendar-cell"); // Add a class for styling
+
+            // Adjusted day number
+            const dayNumber = dayCounter - 1;
+
+            if (i === 0 && j < firstDay.getDay()) {
+              // Empty cells before the first day of the month
+              cell.innerHTML = "";
+            } else if (dayCounter <= lastDay.getDate()) {
+              // Fill in the days of the month
+              const dayNumberDiv = document.createElement("div");
+              dayNumberDiv.classList.add("day-number");
+              dayNumberDiv.textContent = dayCounter;
+              cell.appendChild(dayNumberDiv);
+
+              // Check if there's a check-in for the current day
+              const checkInsForDay = checkInHistory.filter(
+                (checkIn) =>
+                  new Date(checkIn.date).getDate() === dayCounter &&
+                  new Date(checkIn.date).getMonth() === month &&
+                  new Date(checkIn.date).getFullYear() === year
+              );
+
+              if (checkInsForDay.length > 0) {
+                // Display the emoji of the most recent check-in for the day
+                const mostRecentCheckIn =
+                  checkInsForDay[checkInsForDay.length - 1];
+                const emojiDiv = document.createElement("div");
+                emojiDiv.classList.add("checkin-emoji");
+                emojiDiv.textContent = mostRecentCheckIn.emoji;
+
+                // Add click event to show the popup for the check-in
+                emojiDiv.onclick = function () {
+                  showAdvicePopup(mostRecentCheckIn);
+                };
+
+                // Append the emoji to the cell
+                cell.appendChild(emojiDiv);
+              }
+
+              // Create a button for days without a check-in
+              const addButton = document.createElement("button");
+              addButton.classList.add("add-checkin-button");
+              addButton.innerHTML =
+                "<div class='add-checkin-circle'>&nbsp;</div>";
+
+              // Attach a click event to create a new check-in entry for the clicked cell
+              addButton.onclick = function (e) {
+                const clickedDay =
+                  e.currentTarget.parentElement.firstChild.innerText;
+                const clickedDate = new Date(year, month, clickedDay);
+                const existingCheckInIndex = checkInHistory.findIndex(
+                  (checkIn) =>
+                    new Date(checkIn.date).getDate() === dayCounter &&
+                    new Date(checkIn.date).getMonth() === month &&
+                    new Date(checkIn.date).getFullYear() === year
+                );
+
+                if (existingCheckInIndex !== -1) {
+                  // If a check-in already exists for the clicked date, edit it
+                  const existingCheckIn = checkInHistory[existingCheckInIndex];
+                  showAdvicePopup(existingCheckIn);
+                } else {
+                  // If no check-in exists for the clicked date, create a new one
+                  const newCheckIn = {
+                    emoji: "",
+                    text: "",
+                    date: clickedDate,
+                    link: "checkin.html",
+                  };
+
+                  // Save the new check-in to localStorage
+                  checkInHistory.push(newCheckIn);
+                  localStorage.setItem(
+                    "checkInHistory",
+                    JSON.stringify(checkInHistory)
+                  );
+
+                  // Save the clicked emoji and date to localStorage for later display
+                  localStorage.setItem("selectedEmoji", newCheckIn.emoji);
+                  localStorage.setItem("selectedDate", newCheckIn.date);
+
+                  // Redirect to checkin.html with the date parameter
+                  window.location.href = `checkin.html?date=${clickedDate.toISOString()}`;
+                }
+              };
+
+              // Append the button to the cell
+              cell.appendChild(addButton);
+
+              dayCounter++;
+            }
+          }
+        }
+      }
+
       function removeCheckIn(index) {
         var checkInHistory =
           JSON.parse(localStorage.getItem("checkInHistory")) || [];
@@ -116,21 +221,95 @@
 
         // Update the displayed check-in history
         updateCheckInList(checkInHistory);
+
+        // Close the popup
+        closePopup();
       }
 
-      var acc = document.getElementsByClassName("accordion");
-      var i;
+      function showAdvicePopup(checkIn) {
+        var popup = document.getElementById("advicePopup");
+        var adviceText = document.getElementById("adviceText");
+        var adviceLink = document.getElementById("adviceLink");
+        var editNote = document.getElementById("editNote");
 
-      for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var panel = this.nextElementSibling;
-          if (panel.style.display === "block") {
-            panel.style.display = "none";
-          } else {
-            panel.style.display = "block";
-          }
-        });
+        // Find the index of the check-in in the history
+        var checkInHistory =
+          JSON.parse(localStorage.getItem("checkInHistory")) || [];
+        var index = checkInHistory.findIndex(
+          (item) => item.date === checkIn.date && item.emoji === checkIn.emoji
+        );
+
+        // Set the index in localStorage for later reference
+        localStorage.setItem("editIndex", index);
+
+        // Display the original note in the editNote textarea
+        editNote.value = checkIn.text;
+
+        adviceText.textContent = ""; // Clear previous text content
+        adviceLink.href = checkIn.link;
+
+        popup.style.display = "block";
+      }
+
+      function closePopup() {
+        var popup = document.getElementById("advicePopup");
+        popup.style.display = "none";
+      }
+
+      function saveEdit() {
+        var editIndex = localStorage.getItem("editIndex");
+        var editedNote = document.getElementById("editNote").value;
+
+        if (editIndex !== null) {
+          // Retrieve the check-in history from localStorage
+          var checkInHistory =
+            JSON.parse(localStorage.getItem("checkInHistory")) || [];
+
+          // Update the note in the check-in history
+          checkInHistory[editIndex].text = editedNote;
+
+          // Save the updated check-in history to localStorage
+          localStorage.setItem(
+            "checkInHistory",
+            JSON.stringify(checkInHistory)
+          );
+
+          // Close the popup
+          closePopup();
+
+          // Refresh the calendar
+          generateCalendar(checkInHistory);
+        }
+      }
+
+      function deleteEntry() {
+        var editIndex = localStorage.getItem("editIndex");
+
+        if (editIndex !== null) {
+          // Convert the stored index to an integer
+          var editIndexInt = parseInt(editIndex);
+
+          // Retrieve the check-in history from localStorage
+          var checkInHistory =
+            JSON.parse(localStorage.getItem("checkInHistory")) || [];
+
+          // Remove the selected check-in from the history
+          checkInHistory.splice(editIndexInt, 1);
+
+          // Save the updated check-in history to localStorage
+          localStorage.setItem(
+            "checkInHistory",
+            JSON.stringify(checkInHistory)
+          );
+
+          // Close the popup
+          closePopup();
+
+          // Directly refresh the calendar with a slight delay
+          setTimeout(function () {
+            generateCalendar(checkInHistory);
+          }, 100);
+        }
       }
     </script>
   </body>
